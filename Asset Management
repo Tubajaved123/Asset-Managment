@@ -1,0 +1,111 @@
+import tkinter as tk
+from tkinter import ttk, simpledialog
+
+class AssetManagementApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Asset Management System")
+
+        self.assets = []
+        self.asset_types = ["Computer", "Projector", "Printer"]
+        self.semesters = ["Spring", "Summer", "Fall"]
+
+        self.notebook = ttk.Notebook(root)
+        self.notebook.pack(pady=10)
+
+        self.create_tab("Assets Entry", self.create_assets_entry_tab)
+        self.create_tab("Assets Allocations", self.create_allocations_tab)
+        self.create_tab("Assets Types", self.create_types_tab)
+        self.create_tab("Assets Lifetime", self.create_lifetime_tab)
+        self.create_tab("Semester Allocations", self.create_semester_tab)
+
+    def create_tab(self, text, callback):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text=text)
+        callback(frame)
+
+    def create_assets_entry_tab(self, frame):
+        tk.Label(frame, text="Asset Name:").grid(row=0, column=0, padx=10, pady=5)
+        self.asset_name_entry = tk.Entry(frame)
+        self.asset_name_entry.grid(row=0, column=1, padx=10, pady=5)
+
+        tk.Label(frame, text="Asset Type:").grid(row=1, column=0, padx=10, pady=5)
+        self.asset_type_combobox = ttk.Combobox(frame, values=self.asset_types)
+        self.asset_type_combobox.grid(row=1, column=1, padx=10, pady=5)
+
+        tk.Button(frame, text="Add Asset", command=self.add_asset).grid(row=2, column=0, columnspan=2, pady=10)
+
+    def create_allocations_tab(self, frame):
+        tk.Label(frame, text="Select Asset:").grid(row=0, column=0, padx=10, pady=5)
+        self.asset_combobox = ttk.Combobox(frame, values=self.assets)
+        self.asset_combobox.grid(row=0, column=1, padx=10, pady=5)
+
+        tk.Label(frame, text="Semester:").grid(row=1, column=0, padx=10, pady=5)
+        self.semester_combobox = ttk.Combobox(frame, values=self.semesters)
+        self.semester_combobox.grid(row=1, column=1, padx=10, pady=5)
+
+        tk.Button(frame, text="Allocate Asset", command=self.allocate_asset).grid(row=2, column=0, columnspan=2, pady=10)
+
+    def create_types_tab(self, frame):
+        tk.Label(frame, text="Asset Types:").grid(row=0, column=0, padx=10, pady=5)
+        self.types_listbox = tk.Listbox(frame, selectmode=tk.SINGLE, exportselection=False)
+        [self.types_listbox.insert(tk.END, asset_type) for asset_type in self.asset_types]
+        self.types_listbox.grid(row=0, column=1, padx=10, pady=5)
+
+        tk.Button(frame, text="Add Type", command=self.add_type).grid(row=1, column=0, columnspan=2, pady=10)
+
+    def create_lifetime_tab(self, frame):
+        tk.Label(frame, text="Asset Lifetime:").grid(row=0, column=0, padx=10, pady=5)
+        self.lifetime_entry = tk.Entry(frame)
+        self.lifetime_entry.grid(row=0, column=1, padx=10, pady=5)
+
+        tk.Button(frame, text="Set Lifetime", command=self.set_lifetime).grid(row=1, column=0, columnspan=2, pady=10)
+
+    def create_semester_tab(self, frame):
+        tk.Label(frame, text="Semester:").grid(row=0, column=0, padx=10, pady=5)
+        self.semester_combobox_allocation = ttk.Combobox(frame, values=self.semesters)
+        self.semester_combobox_allocation.grid(row=0, column=1, padx=10, pady=5)
+
+        tk.Label(frame, text="Courses:").grid(row=1, column=0, padx=10, pady=5)
+        self.courses_entry = tk.Entry(frame)
+        self.courses_entry.grid(row=1, column=1, padx=10, pady=5)
+
+        tk.Button(frame, text="Allocate Courses", command=self.allocate_courses).grid(row=2, column=0, columnspan=2, pady=10)
+
+    def add_asset(self):
+        asset_name = self.asset_name_entry.get()
+        asset_type = self.asset_type_combobox.get()
+        if asset_name and asset_type:
+            asset = f"{asset_name} - {asset_type}"
+            self.assets.append(asset)
+            self.asset_combobox["values"] = self.assets
+            self.asset_name_entry.delete(0, tk.END)
+            self.asset_type_combobox.set("")
+
+    def allocate_asset(self):
+        selected_asset = self.asset_combobox.get()
+        selected_semester = self.semester_combobox.get()
+        if selected_asset and selected_semester:
+            print(f"Allocating {selected_asset} for {selected_semester}")
+
+    def add_type(self):
+        new_type = simpledialog.askstring("Add Asset Type", "Enter new asset type:")
+        if new_type and new_type not in self.asset_types:
+            self.asset_types.append(new_type)
+            self.types_listbox.insert(tk.END, new_type)
+
+    def set_lifetime(self):
+        lifetime_value = self.lifetime_entry.get()
+        if lifetime_value:
+            print(f"Setting asset lifetime to {lifetime_value} years")
+
+    def allocate_courses(self):
+        selected_semester = self.semester_combobox_allocation.get()
+        allocated_courses = self.courses_entry.get()
+        if selected_semester and allocated_courses:
+            print(f"Allocating courses {allocated_courses} for {selected_semester}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AssetManagementApp(root)
+    root.mainloop()
