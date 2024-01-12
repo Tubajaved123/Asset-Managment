@@ -1,0 +1,38 @@
+from flask import Flask, request, jsonify
+from pymongo import MongoClient
+
+app = Flask(__name__)
+
+# Connect to MongoDB
+client = MongoClient('mongodb://localhost:27017/')
+db = client['asset_management']
+
+@app.route('/allocate_assets', methods=['POST'])
+def allocate_assets():
+    try:
+        # Get data from the JSON payload
+        data = request.get_json()
+        total_portfolio_value = float(data.get('total_portfolio_value'))
+        risk_tolerance = float(data.get('risk_tolerance'))
+
+        # Perform asset allocation logic (you can customize this part)
+        # Example: Simple 60-40 allocation
+        stock_allocation = 0.6 * total_portfolio_value
+        bond_allocation = 0.4 * total_portfolio_value
+
+        # Save result to MongoDB
+        result = {
+            'stock_allocation': round(stock_allocation, 2),
+            'bond_allocation': round(bond_allocation, 2),
+            'risk_tolerance': round(risk_tolerance, 2)
+        }
+        db.asset_allocations.insert_one(result)
+
+        # Return result as JSON
+        return jsonify(result)
+
+    except ValueError:
+        return jsonify({'error': 'Please provide valid numeric values'}), 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
